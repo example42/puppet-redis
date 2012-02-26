@@ -307,7 +307,7 @@ class redis (
   }
 
   ### Sysctl prerequisites
-  sysctl::conf    { "vm.overcommit_memory":  value => "1" }
+  # sysctl::conf    { "vm.overcommit_memory":  value => "1" }
 
   ### Managed resources
   package { 'redis':

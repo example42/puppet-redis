@@ -18,12 +18,12 @@ class redis::params {
 
   $package = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => 'redis-server',
-    default => 'redis',
+    default                   => 'redis',
   }
 
   $service = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => 'redis-server',
-    default => 'redis',
+    default                   => 'redis',
   }
 
   $service_status = $::operatingsystem ? {
@@ -48,7 +48,7 @@ class redis::params {
 
   $config_file = $::operatingsystem ? {
     /(?i:RedHat|Scientific|Centos|Fedora)/ => '/etc/redis.conf',
-    default => '/etc/redis/redis.conf',
+    default                                => '/etc/redis/redis.conf',
   }
 
   $config_file_mode = $::operatingsystem ? {
@@ -69,7 +69,7 @@ class redis::params {
 
   $pid_file = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => '/var/run/redis.pid',
-    default => '/var/run/redis/redis.pid',
+    default                   => '/var/run/redis/redis.pid',
   }
 
   $data_dir = $::operatingsystem ? {
@@ -82,7 +82,7 @@ class redis::params {
 
   $log_file = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => '/var/log/redis/redis-server.log',
-    default => '/var/log/redis/redis.log',
+    default                   => '/var/log/redis/redis.log',
   }
 
   $port = '6379'
