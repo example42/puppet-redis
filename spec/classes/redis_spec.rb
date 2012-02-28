@@ -121,6 +121,22 @@ describe 'redis' do
     end
   end
 
+  describe 'Test service autorestart' do
+    it 'should automatically restart the service, by default' do
+      content = catalogue.resource('file', 'redis.conf').send(:parameters)[:notify]
+      content.should == "Service[redis]"
+    end
+  end
+
+  describe 'Test service autorestart' do
+    let(:params) { {:service_autorestart => "no" } }
+
+    it 'should not automatically restart the service, when service_autorestart => false' do
+      content = catalogue.resource('file', 'redis.conf').send(:parameters)[:notify]
+      content.should be_nil
+    end
+  end
+
   describe 'Test Puppi Integration' do
     let(:params) { {:puppi => true, :puppi_helper => "myhelper"} }
 

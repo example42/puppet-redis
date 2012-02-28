@@ -40,6 +40,11 @@
 #   An hash of custom options to be used in templates for arbitrary settings.
 #   Can be defined also by the (top scope) variable $redis_options
 #
+# [*service_autorestart*]
+#   Automatically restarts the redis service when there is a change in
+#   configuration files. Default: true, Set to false if you don't want to
+#   automatically restart the service.
+#
 # [*absent*]
 #   Set to 'true' to remove package(s) installed by module
 #   Can be defined also by the (top scope) variable $redis_absent
@@ -194,47 +199,49 @@
 #   Alessandro Franceschi <al@lab42.it/>
 #
 class redis (
-  $my_class          = params_lookup( 'my_class' ),
-  $source            = params_lookup( 'source' ),
-  $source_dir        = params_lookup( 'source_dir' ),
-  $source_dir_purge  = params_lookup( 'source_dir_purge' ),
-  $template          = params_lookup( 'template' ),
-  $options           = params_lookup( 'options' ),
-  $absent            = params_lookup( 'absent' ),
-  $disable           = params_lookup( 'disable' ),
-  $disableboot       = params_lookup( 'disableboot' ),
-  $monitor           = params_lookup( 'monitor' , 'global' ),
-  $monitor_tool      = params_lookup( 'monitor_tool' , 'global' ),
-  $monitor_target    = params_lookup( 'monitor_target' , 'global' ),
-  $puppi             = params_lookup( 'puppi' , 'global' ),
-  $puppi_helper      = params_lookup( 'puppi_helper' , 'global' ),
-  $firewall          = params_lookup( 'firewall' , 'global' ),
-  $firewall_tool     = params_lookup( 'firewall_tool' , 'global' ),
-  $firewall_src      = params_lookup( 'firewall_src' , 'global' ),
-  $firewall_dst      = params_lookup( 'firewall_dst' , 'global' ),
-  $debug             = params_lookup( 'debug' , 'global' ),
-  $audit_only        = params_lookup( 'audit_only' , 'global' ),
-  $package           = params_lookup( 'package' ),
-  $service           = params_lookup( 'service' ),
-  $service_status    = params_lookup( 'service_status' ),
-  $process           = params_lookup( 'process' ),
-  $process_args      = params_lookup( 'process_args' ),
-  $process_user      = params_lookup( 'process_user' ),
-  $config_dir        = params_lookup( 'config_dir' ),
-  $config_file       = params_lookup( 'config_file' ),
-  $config_file_mode  = params_lookup( 'config_file_mode' ),
-  $config_file_owner = params_lookup( 'config_file_owner' ),
-  $config_file_group = params_lookup( 'config_file_group' ),
-  $config_file_init  = params_lookup( 'config_file_init' ),
-  $pid_file          = params_lookup( 'pid_file' ),
-  $data_dir          = params_lookup( 'data_dir' ),
-  $log_dir           = params_lookup( 'log_dir' ),
-  $log_file          = params_lookup( 'log_file' ),
-  $port              = params_lookup( 'port' ),
-  $protocol          = params_lookup( 'protocol' )
+  $my_class            = params_lookup( 'my_class' ),
+  $source              = params_lookup( 'source' ),
+  $source_dir          = params_lookup( 'source_dir' ),
+  $source_dir_purge    = params_lookup( 'source_dir_purge' ),
+  $template            = params_lookup( 'template' ),
+  $service_autorestart = params_lookup( 'service_autorestart' , 'global' ),
+  $options             = params_lookup( 'options' ),
+  $absent              = params_lookup( 'absent' ),
+  $disable             = params_lookup( 'disable' ),
+  $disableboot         = params_lookup( 'disableboot' ),
+  $monitor             = params_lookup( 'monitor' , 'global' ),
+  $monitor_tool        = params_lookup( 'monitor_tool' , 'global' ),
+  $monitor_target      = params_lookup( 'monitor_target' , 'global' ),
+  $puppi               = params_lookup( 'puppi' , 'global' ),
+  $puppi_helper        = params_lookup( 'puppi_helper' , 'global' ),
+  $firewall            = params_lookup( 'firewall' , 'global' ),
+  $firewall_tool       = params_lookup( 'firewall_tool' , 'global' ),
+  $firewall_src        = params_lookup( 'firewall_src' , 'global' ),
+  $firewall_dst        = params_lookup( 'firewall_dst' , 'global' ),
+  $debug               = params_lookup( 'debug' , 'global' ),
+  $audit_only          = params_lookup( 'audit_only' , 'global' ),
+  $package             = params_lookup( 'package' ),
+  $service             = params_lookup( 'service' ),
+  $service_status      = params_lookup( 'service_status' ),
+  $process             = params_lookup( 'process' ),
+  $process_args        = params_lookup( 'process_args' ),
+  $process_user        = params_lookup( 'process_user' ),
+  $config_dir          = params_lookup( 'config_dir' ),
+  $config_file         = params_lookup( 'config_file' ),
+  $config_file_mode    = params_lookup( 'config_file_mode' ),
+  $config_file_owner   = params_lookup( 'config_file_owner' ),
+  $config_file_group   = params_lookup( 'config_file_group' ),
+  $config_file_init    = params_lookup( 'config_file_init' ),
+  $pid_file            = params_lookup( 'pid_file' ),
+  $data_dir            = params_lookup( 'data_dir' ),
+  $log_dir             = params_lookup( 'log_dir' ),
+  $log_file            = params_lookup( 'log_file' ),
+  $port                = params_lookup( 'port' ),
+  $protocol            = params_lookup( 'protocol' )
   ) inherits redis::params {
 
   $bool_source_dir_purge=any2bool($source_dir_purge)
+  $bool_service_autorestart=any2bool($service_autorestart)
   $bool_absent=any2bool($absent)
   $bool_disable=any2bool($disable)
   $bool_disableboot=any2bool($disableboot)
@@ -267,6 +274,11 @@ class redis (
       true    => 'stopped',
       default => 'running',
     },
+  }
+
+  $manage_service_autorestart = $redis::bool_service_autorestart ? {
+    true    => 'Service[redis]',
+    false   => undef,
   }
 
   $manage_file = $redis::bool_absent ? {
@@ -306,6 +318,7 @@ class redis (
     default   => template($redis::template),
   }
 
+
   ### Sysctl prerequisites
   # sysctl::conf    { "vm.overcommit_memory":  value => "1" }
 
@@ -322,7 +335,6 @@ class redis (
     hasstatus  => $redis::service_status,
     pattern    => $redis::process,
     require    => Package['redis'],
-    subscribe  => File['redis.conf'],
   }
 
   file { 'redis.conf':
@@ -332,7 +344,7 @@ class redis (
     owner   => $redis::config_file_owner,
     group   => $redis::config_file_group,
     require => Package['redis'],
-    notify  => Service['redis'],
+    notify  => $redis::manage_service_autorestart,
     source  => $redis::manage_file_source,
     content => $redis::manage_file_content,
     replace => $redis::manage_file_replace,
@@ -344,10 +356,11 @@ class redis (
     file { 'redis.dir':
       ensure  => directory,
       path    => $redis::config_dir,
-      require => Class['redis::install'],
-      source  => $source_dir,
+      require => Package['redis'],
+      notify  => $redis::manage_service_autorestart,
+      source  => $redis::source_dir,
       recurse => true,
-      purge   => $source_dir_purge,
+      purge   => $redis::source_dir_purge,
       replace => $redis::manage_file_replace,
       audit   => $redis::manage_audit,
     }
