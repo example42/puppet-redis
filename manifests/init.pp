@@ -408,8 +408,8 @@ class redis (
   ### Firewall management, if enabled ( firewall => true )
   if $redis::bool_firewall == true {
     firewall { "redis_${redis::protocol}_${redis::port}":
-      source      => $redis::firewall_source,
-      destination => $redis::firewall_destination,
+      source      => $redis::firewall_src,
+      destination => $redis::firewall_dst,
       protocol    => $redis::protocol,
       port        => $redis::port,
       action      => 'allow',
