@@ -360,7 +360,7 @@ class redis (
       notify  => $redis::manage_service_autorestart,
       source  => $redis::source_dir,
       recurse => true,
-      purge   => $redis::source_dir_purge,
+      purge   => $redis::bool_source_dir_purge,
       replace => $redis::manage_file_replace,
       audit   => $redis::manage_audit,
     }
