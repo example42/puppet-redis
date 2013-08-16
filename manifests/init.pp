@@ -45,6 +45,12 @@
 #   configuration files. Default: true, Set to false if you don't want to
 #   automatically restart the service.
 #
+# [*version*]
+#   The package version, used in the ensure parameter of package type.
+#   Default: present. Can be 'latest' or a specific version number.
+#   Note that if the argument absent (see below) is set to true, the
+#   package is removed, whatever the value of version parameter.
+#
 # [*absent*]
 #   Set to 'true' to remove package(s) installed by module
 #   Can be defined also by the (top scope) variable $redis_absent
@@ -206,6 +212,7 @@ class redis (
   $template            = params_lookup( 'template' ),
   $service_autorestart = params_lookup( 'service_autorestart' , 'global' ),
   $options             = params_lookup( 'options' ),
+  $version             = params_lookup( 'version' ),
   $absent              = params_lookup( 'absent' ),
   $disable             = params_lookup( 'disable' ),
   $disableboot         = params_lookup( 'disableboot' ),
@@ -254,7 +261,7 @@ class redis (
   ### Definition of some variables used in the module
   $manage_package = $redis::bool_absent ? {
     true  => 'absent',
-    false => 'present',
+    false => $redis::version,
   }
 
   $manage_service_enable = $redis::bool_disableboot ? {

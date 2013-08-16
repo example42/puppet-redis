@@ -96,6 +96,7 @@ class redis::params {
   $template = ''
   $options = ''
   $service_autorestart = true
+  $version = 'present'
   $absent = false
   $disable = false
   $disableboot = false
