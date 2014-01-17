@@ -16,6 +16,8 @@ class redis::params {
 
   ### Application related parameters
 
+  $password = ''
+
   $package = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => 'redis-server',
     default                   => 'redis',

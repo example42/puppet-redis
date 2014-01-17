@@ -191,6 +191,9 @@
 #   This is used by monitor, firewall and puppi (optional) components
 #   Can be defined also by the (top scope) variable $redis_protocol
 #
+# [*password*]
+#   The password to protect Redis with. This parameter is currently not
+#   used in the manifests, but can be used with a custom template.
 #
 # == Examples
 #
@@ -244,7 +247,8 @@ class redis (
   $log_dir             = params_lookup( 'log_dir' ),
   $log_file            = params_lookup( 'log_file' ),
   $port                = params_lookup( 'port' ),
-  $protocol            = params_lookup( 'protocol' )
+  $protocol            = params_lookup( 'protocol' ),
+  $password            = params_lookup( 'password' ),
   ) inherits redis::params {
 
   $bool_source_dir_purge=any2bool($source_dir_purge)
@@ -408,6 +412,10 @@ class redis (
       argument => $redis::process_args,
       tool     => $redis::monitor_tool,
       enable   => $redis::manage_monitor,
+    }
+
+    if ($::redis::monitor_tool =~ /munin/) {
+      include $::redis::munin
     }
   }
 
