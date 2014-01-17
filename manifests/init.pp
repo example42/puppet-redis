@@ -415,7 +415,7 @@ class redis (
     }
 
     if ($::redis::monitor_tool =~ /munin/) {
-      include $::redis::munin
+      include ::redis::munin
     }
   }
 

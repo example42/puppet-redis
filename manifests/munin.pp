@@ -21,10 +21,8 @@ class redis::munin {
     ]:
     ensure  => link,
     target  => "${::munin::plugins_dir}/redis_",
-    require => [
-      File["${::munin::plugins_dir}/redis_"],
-      Package['munin']
-    ]
+    require => Package[$::munin::package],
+    notify  => Service['munin-node']
   }
 
 }
