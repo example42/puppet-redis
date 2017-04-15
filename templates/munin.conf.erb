@@ -1,0 +1,6 @@
+# File managed by Puppet
+
+[redis_*]
+env.host 127.0.0.1
+env.port <%= scope.lookupvar('::redis::port') %>
+env.password <%= scope.lookupvar('::redis::password').gsub('#', '\#') %>
